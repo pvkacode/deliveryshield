@@ -267,11 +267,10 @@ def score_batch(model, df_raw):
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if not os.path.exists(os.path.join(root, 'models', 'xgb_model.pkl')):
     import subprocess, sys
-    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    with st.spinner("First run — generating data and training model (~3 min). Please wait..."):
+    with st.spinner("First run — generating data and training model (~2 min). Please wait..."):
         subprocess.run([sys.executable, os.path.join(root, 'src', 'generate_data.py')],
                       cwd=root, check=True)
-        subprocess.run([sys.executable, os.path.join(root, 'src', 'train_model.py')],
+        subprocess.run([sys.executable, os.path.join(root, 'src', 'train_cloud.py')],
                       cwd=root, check=True)
     st.rerun()
 
