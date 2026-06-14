@@ -161,10 +161,13 @@ def add_features(X):
 # ── model loader ──────────────────────────────────────────────────────────────
 @st.cache_resource
 def load_model():
+    # Support both local (run from root) and Streamlit Cloud (run from app/) paths
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    model_dir = os.path.join(root, 'models')
     try:
-        model     = joblib.load('models/xgb_model.pkl')
-        explainer = joblib.load('models/shap_explainer.pkl')
-        with open('models/metrics.json') as f:
+        model     = joblib.load(os.path.join(model_dir, 'xgb_model.pkl'))
+        explainer = joblib.load(os.path.join(model_dir, 'shap_explainer.pkl'))
+        with open(os.path.join(model_dir, 'metrics.json')) as f:
             metrics = json.load(f)
         return model, explainer, metrics
     except FileNotFoundError:
@@ -176,7 +179,8 @@ def predict(model, row_dict):
     df = add_features(df)
     # Use saved feature cols if available
     try:
-        feat_cols = joblib.load('models/feature_cols.pkl')
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        feat_cols = joblib.load(os.path.join(root, 'models', 'feature_cols.pkl'))
         df = df[feat_cols]
     except:
         pass
@@ -260,11 +264,15 @@ def score_batch(model, df_raw):
 
 # ── load ──────────────────────────────────────────────────────────────────────
 # Auto-train if models don't exist (for Streamlit Cloud)
-if not os.path.exists('models/xgb_model.pkl'):
-    import subprocess
-    with st.spinner("First run — generating data and training model (~3 min)..."):
-        subprocess.run(['python', 'src/generate_data.py'], check=True)
-        subprocess.run(['python', 'src/train_model.py'], check=True)
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if not os.path.exists(os.path.join(root, 'models', 'xgb_model.pkl')):
+    import subprocess, sys
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    with st.spinner("First run — generating data and training model (~3 min). Please wait..."):
+        subprocess.run([sys.executable, os.path.join(root, 'src', 'generate_data.py')],
+                      cwd=root, check=True)
+        subprocess.run([sys.executable, os.path.join(root, 'src', 'train_model.py')],
+                      cwd=root, check=True)
     st.rerun()
 
 model, explainer, metrics = load_model()
@@ -543,16 +551,19 @@ with tab3:
 
     st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
-    def try_img(a, b): return a if os.path.exists(a) else b if os.path.exists(b) else None
+    def try_img(a, b):
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        pa = os.path.join(root, 'models', os.path.basename(a))
+        return pa if os.path.exists(pa) else None
     c1, c2, c3 = st.columns(3)
     with c1:
-        p = try_img('../models/model_comparison.png','models/model_comparison.png')
+        p = try_img('models/model_comparison.png','models/model_comparison.png')
         if p: st.image(p, caption='Model comparison — all metrics', use_container_width=True)
     with c2:
-        p = try_img('../models/shap_summary.png','models/shap_summary.png')
+        p = try_img('models/shap_summary.png','models/shap_summary.png')
         if p: st.image(p, caption='Global SHAP feature importance', use_container_width=True)
     with c3:
-        p = try_img('../models/confusion_matrix.png','models/confusion_matrix.png')
+        p = try_img('models/confusion_matrix.png','models/confusion_matrix.png')
         if p:
             # Re-render confusion matrix with dark theme
             import matplotlib.image as mpimg
