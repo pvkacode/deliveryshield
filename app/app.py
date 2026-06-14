@@ -259,6 +259,14 @@ def score_batch(model, df_raw):
     return pd.DataFrame(results)
 
 # ── load ──────────────────────────────────────────────────────────────────────
+# Auto-train if models don't exist (for Streamlit Cloud)
+if not os.path.exists('models/xgb_model.pkl'):
+    import subprocess
+    with st.spinner("First run — generating data and training model (~3 min)..."):
+        subprocess.run(['python', 'src/generate_data.py'], check=True)
+        subprocess.run(['python', 'src/train_model.py'], check=True)
+    st.rerun()
+
 model, explainer, metrics = load_model()
 
 st.markdown("""
