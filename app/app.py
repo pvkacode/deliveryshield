@@ -306,13 +306,13 @@ with tab1:
         st.markdown('<div class="section-label">📦 Package & Address</div>', unsafe_allow_html=True)
         c1, c2 = st.columns(2)
         with c1:
-            address_type = st.selectbox("Address type", list(ADDRESS_MAP.keys()), index=1, key='at')
+            address_type = st.selectbox("Address type", list(ADDRESS_MAP.keys()), index=0, key='at')
             package_size = st.selectbox("Package size", list(PACKAGE_MAP.keys()), key='ps')
         with c2:
             urban_density = st.selectbox("Area type", list(DENSITY_MAP.keys()), key='ud')
-            prior_fails   = st.selectbox("Prior failures at address", [0,1,2,3], index=1, key='pf')
+            prior_fails   = st.selectbox("Prior failures at address", [0,1,2,3], index=0, key='pf')
         package_weight = st.slider("Package weight (kg)", 0.1, 30.0, 2.5, 0.1, key='pw')
-        zip_failure    = st.slider("Area historical failure rate", 0.0, 0.5, 0.25, 0.01, key='zf')
+        zip_failure    = st.slider("Area historical failure rate", 0.0, 0.5, 0.08, 0.01, key='zf')
         distance       = st.slider("Distance from depot (km)", 0.5, 80.0, 15.0, 0.5, key='d')
 
         st.markdown('<div class="section-label" style="margin-top:1.25rem">👤 Customer</div>', unsafe_allow_html=True)
@@ -320,7 +320,7 @@ with tab1:
         note_quality = st.select_slider("Instruction quality", [0,1,2,3],
                          format_func=lambda x:['None','Vague','OK','Detailed'][x],
                          value=2, key='nq') if has_note else 0
-        customer_home = st.slider("Likelihood customer is home", 0.0, 1.0, 0.35, 0.05, key='ch')
+        customer_home = st.slider("Likelihood customer is home", 0.0, 1.0, 0.70, 0.05, key='ch')
 
         st.markdown('<div class="section-label" style="margin-top:1.25rem">🗓️ Timing & Weather</div>', unsafe_allow_html=True)
         c1, c2 = st.columns(2)
